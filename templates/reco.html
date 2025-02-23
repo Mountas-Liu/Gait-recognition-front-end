@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload and Process</title>
+    <style>
+        #upload-form {
+            display: flex; 
+            flex-direction: column; 
+        }
+        label {
+            font-size: 20px;
+        }
+        #upload-form {
+            margin-bottom: 20px;
+        }
+        button {
+            max-width: 83%;
+            padding: 6px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        #video-preview {
+            max-width: 500px;
+            max-height: 500px; 
+            width: auto; 
+            height: auto;      
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>步态录入</h1>
+
+    <!-- 文件上传表单 -->
+    <div id="upload-form">
+        <input type="file" id="video-input" accept="video/*" required>
+        <br>
+        <button type="button" id="upload-button">上传！</button>
+    </div>
+
+    <div style="display: flex;">
+        <!-- 视频预览 -->
+        <div id="preview-area" style="flex: 1; padding: 1px; border: 1px solid #ffffff;">
+            <h3>Video Preview:</h3>
+            <video id="video-preview" controls></video>
+        </div>
+
+        <!-- 后端处理结果 -->
+        <div id="result-area" style="flex: 1; padding: 1px; border: 1px solid #ffffff;">
+            <h3>Processing Result:</h3>
+            <p id="result-text"></p>
+        </div>
+    </div>
+
+    <script>
+        // 视频上传和预览
+        document.getElementById('upload-button').addEventListener('click', function () {
+            const fileInput = document.getElementById('video-input');
+            const videoPreview = document.getElementById('video-preview');
+
+            // 检查是否选择了文件
+            if (fileInput.files.length === 0) {
+                alert('Please select a video file.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            // 读取视频文件并生成预览
+            reader.onload = function (event) {
+                videoPreview.src = event.target.result;
+                videoPreview.style.display = 'block';
+            };
+
+            reader.readAsDataURL(file);
+
+            // 将图片发送到后端处理
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('/enter-img', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultText.textContent = data.message || 'Image processed successfully.';
+            })
+            .catch(error => {
+                resultText.textContent = 'Error processing image.';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

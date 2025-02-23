@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload and Process</title>
+    <style>
+        #upload-form {
+            display: flex; 
+            flex-direction: column; 
+        }
+        label {
+            font-size: 20px;
+        }
+        #text-input {
+            width: 80%;
+            height: 30px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            color: #333;
+            background-color: #fff;
+            resize: vertical;
+            outline: none;
+        }
+        button {
+            max-width: 83%;
+            padding: 6px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        #video-preview {
+            max-width: 500px;
+            max-height: 500px; 
+            width: auto; 
+            height: auto;      
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>步态录入</h1>
+
+    <!-- 文件上传表单 -->
+    <div id="upload-form">
+        <input type="file" id="video-input" accept="video/*" required>
+        <br>
+        <label for="text-input">姓名:</label>
+        <br>
+        <textarea id="text-input" placeholder="姓名..." required></textarea>
+        <br>
+        <button type="button" id="upload-button">上传！</button>
+    </div>
+
+    <!-- 视频预览 -->
+    <div id="preview-area">
+        <h3>Video Preview:</h3>
+        <video id="video-preview" controls></video>
+    </div>
+
+    <!-- 后端处理结果 -->
+    <div id="result-area">
+        <h3>Processing Result:</h3>
+        <p id="result-text"></p>
+    </div>
+
+    <script>
+        // 视频上传和预览
+        document.getElementById('upload-button').addEventListener('click', function () {
+            const fileInput = document.getElementById('video-input');
+            const textInput = document.getElementById('text-input');
+            const videoPreview = document.getElementById('video-preview');
+            const resultText = document.getElementById('result-text');
+
+            // 检查是否选择了文件和输入了文字
+            if (fileInput.files.length === 0 || textInput.value.trim() === '') {
+                alert('请选择视频文件并输入文字信息。');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const text = textInput.value;
+
+            // 读取视频文件并生成预览
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                videoPreview.src = event.target.result;
+                videoPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            // 将文件和文字信息打包为 FormData
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('text', text);
+
+            // 发送到后端
+            fetch('/enter-image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultText.textContent = data.message || '上传成功！';
+            })
+            .catch(error => {
+                resultText.textContent = '上传失败，请重试。';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
