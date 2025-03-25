@@ -1,7 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Home Page</h1>
-    <p>Welcome to the home page!</p>
-    <p>这是猪猪的香香宝宝做的前端！！</p>
+<head>
+    <style>
+        label {
+            font-size: 20px;
+        }
+        #text-input {
+            width: 80%;
+            height: 30px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 25px;
+            color: #333;
+            background-color: #fff;
+            resize: vertical;
+            outline: none;
+        }
+        button {
+            max-width: 83%;
+            padding: 6px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>登录</h1>
+    <div id="upload-form">
+        <label for="text-input">账户:</label>
+        <br>
+        <textarea id="text-input" placeholder="ID..." required></textarea>
+        <br>
+        <label for="text-input">密码:</label>
+        <br>
+        <textarea id="text-input" placeholder="ID..." required></textarea>
+        <br>
+        <button type="button" id="upload-button">登陆！</button>
+    </div>
+</body>
 {% endblock %}

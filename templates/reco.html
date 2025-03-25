@@ -60,11 +60,33 @@
             display: flex; 
             background-color: #dc3545;
         }
+        .buttonTime {
+            position: absolute;
+            top: 200px; 
+            left: 1500px;
+            width: 200px;
+            height: 100px;
+            font-size: 30px;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+        }
+        .buttonUp {
+            position: absolute;
+            top: 400px; 
+            max-width: 83%;
+            left: 1500px;
+            width: 200px;
+            height: 100px;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>身份识别与预警</h1>
-    <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 2" style="position: absolute; width: 700px; top: 100px; left: 750px;">
+    <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 2" style="position: absolute; width: 700px; top: 100px; left: 700px;">
     
     <form id="nameForm">
         <label for="nameInput">ID:</label>
@@ -98,5 +120,7 @@
             }
         });
     </script>
+    <button type="button" id="upload-button" class="buttonTime">实时监控</button>
+    <input type="file" id="video-input" accept="video/*" class="buttonUp" required>
 </body>
 {% endblock %}
