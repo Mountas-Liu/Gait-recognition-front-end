@@ -8,13 +8,21 @@ app = Flask(__name__)
 def home():
     return render_template('home.html')
 
+@app.route('/reco')
+def reco():
+    return render_template('reco.html')
+
+@app.route('/info')
+def info():
+    return render_template('info.html')
+
+@app.route('/extract')
+def extract():
+    return render_template('extract.html')
+
 @app.route('/stat')
 def stat():
     return render_template('stat.html')
-
-@app.route('/enter')
-def enter():
-    return render_template('enter.html')
 
 @app.route('/enter-img')
 def enter_img():
@@ -40,9 +48,6 @@ def enter_img():
         'image': byte_io.read().hex()  # 将图片数据转为十六进制字符串
     })
 
-@app.route('/reco')
-def reco():
-    return render_template('reco.html')
 
 @app.route('/reco-img')
 def reco_img():
@@ -68,9 +73,15 @@ def reco_img():
         'image': byte_io.read().hex()  # 将图片数据转为十六进制字符串
     })
 
-@app.route('/warn')
-def warn():
-    return render_template('warn.html')
+existing_names = ['张三', '李四']
+
+@app.route('/check_name', methods=['POST'])
+def check_name():
+    data = request.get_json()
+    name = data['name']
+    exists = name in existing_names
+
+    return jsonify({'exists': exists})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

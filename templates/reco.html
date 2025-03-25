@@ -1,106 +1,102 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Upload and Process</title>
     <style>
-        #upload-form {
-            display: flex; 
-            flex-direction: column; 
+        body {
+            position: relative;
         }
         label {
-            font-size: 20px;
+            position: absolute;
+            top: 702px;
+            left: 490px;
+            font-size: 40px;
+            font-weight: normal;
         }
-        #upload-form {
-            margin-bottom: 20px;
+        .nameInput {
+            position: absolute;  
+            width: 250px;
+            top: 700px;
+            left: 550px;
+            padding: 8px;
+            font-size: 30px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
-        button {
-            max-width: 83%;
-            padding: 6px 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
+        .resultLabel {
+            position: absolute; 
+            top: 690px; 
+            left: 1050px;
+            font-size: 50px;
+            font-weight: normal;
         }
-        #video-preview {
-            max-width: 500px;
-            max-height: 500px; 
-            width: auto; 
-            height: auto;      
-            height: auto;
+        .success {
+            position: absolute;
+            top: 640px; 
+            left: 1450px;
+            width: 400px;
+            height: 200px;
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            white-space: pre-wrap;
+            display: flex; 
+            background-color: #28a745;
+        }
+        .failure {
+            position: absolute;
+            top: 640px; 
+            left: 1500px;
+            width: 400px;
+            height: 200px;
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            white-space: pre-wrap;
+            display: flex; 
+            background-color: #dc3545;
         }
     </style>
 </head>
 <body>
-    <h1>步态录入</h1>
-
-    <!-- 文件上传表单 -->
-    <div id="upload-form">
-        <input type="file" id="video-input" accept="video/*" required>
-        <br>
-        <button type="button" id="upload-button">上传！</button>
-    </div>
-
-    <div style="display: flex;">
-        <!-- 视频预览 -->
-        <div id="preview-area" style="flex: 1; padding: 1px; border: 1px solid #ffffff;">
-            <h3>Video Preview:</h3>
-            <video id="video-preview" controls></video>
-        </div>
-
-        <!-- 后端处理结果 -->
-        <div id="result-area" style="flex: 1; padding: 1px; border: 1px solid #ffffff;">
-            <h3>Processing Result:</h3>
-            <p id="result-text"></p>
-        </div>
-    </div>
-
+    <h1>身份识别与预警</h1>
+    <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 2" style="position: absolute; width: 700px; top: 100px; left: 750px;">
+    
+    <form id="nameForm">
+        <label for="nameInput">ID:</label>
+        <input type="text" id="nameInput" name="name" autocomplete="off", class="nameInput">
+        <span id="resultLabel" class="resultLabel"></span>
+        <span id="resultBox" class="resultBox"></span> 
+    </form>
     <script>
-        // 视频上传和预览
-        document.getElementById('upload-button').addEventListener('click', function () {
-            const fileInput = document.getElementById('video-input');
-            const videoPreview = document.getElementById('video-preview');
+        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const name = this.value.trim();
+                if (name) {
+                    fetch('/check_name', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json',},
+                        body: JSON.stringify({ name: name })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultLabel = document.getElementById('resultLabel');
+                        resultLabel.textContent = data.exists ? '已授权' : '未授权';
 
-            // 检查是否选择了文件
-            if (fileInput.files.length === 0) {
-                alert('Please select a video file.');
-                return;
+                        const resultBox = document.getElementById('resultBox');
+                        resultBox.textContent = data.exists ? '安全\nSAFE' : '警告\nWARNING';
+                        // 设置颜色样式
+                        if (data.exists) resultBox.className = 'success';
+                        else             resultBox.className = 'failure';
+                    });
+                }
             }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            // 读取视频文件并生成预览
-            reader.onload = function (event) {
-                videoPreview.src = event.target.result;
-                videoPreview.style.display = 'block';
-            };
-
-            reader.readAsDataURL(file);
-
-            // 将图片发送到后端处理
-            const formData = new FormData();
-            formData.append('image', file);
-
-            fetch('/enter-img', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                resultText.textContent = data.message || 'Image processed successfully.';
-            })
-            .catch(error => {
-                resultText.textContent = 'Error processing image.';
-                console.error('Error:', error);
-            });
         });
     </script>
 </body>
-</html>
 {% endblock %}

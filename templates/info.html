@@ -22,7 +22,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             font-family: Arial, sans-serif;
-            font-size: 20px;
+            font-size: 25px;
             color: #333;
             background-color: #fff;
             resize: vertical;
@@ -53,9 +53,23 @@
     <div id="upload-form">
         <input type="file" id="video-input" accept="video/*" required>
         <br>
-        <label for="text-input">姓名:</label>
+        <label for="text-input">ID:</label>
         <br>
-        <textarea id="text-input" placeholder="姓名..." required></textarea>
+        <textarea id="text-input" placeholder="ID..." required></textarea>
+        <br>
+        <label for="text-input">权限:</label>
+        <br>
+        <div class="radio-container">
+            <label class="radio-label">
+                <input type="radio" name="option" value="Option1"> 授权
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="option" value="Option2"> 未授权
+            </label>
+            <!-- <label class="radio-label">
+                <input type="radio" name="option" value="Option3"> 选项 3
+            </label> -->
+        </div>
         <br>
         <button type="button" id="upload-button">上传！</button>
     </div>
