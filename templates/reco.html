@@ -9,7 +9,7 @@
         label {
             position: absolute;
             top: 702px;
-            left: 490px;
+            left: 690px;
             font-size: 40px;
             font-weight: normal;
         }
@@ -17,7 +17,7 @@
             position: absolute;  
             width: 250px;
             top: 700px;
-            left: 550px;
+            left: 750px;
             padding: 8px;
             font-size: 30px;
             border-radius: 5px;
@@ -26,7 +26,7 @@
         .resultLabel {
             position: absolute; 
             top: 690px; 
-            left: 1050px;
+            left: 1200px;
             font-size: 50px;
             font-weight: normal;
         }
@@ -73,21 +73,54 @@
         }
         .buttonUp {
             position: absolute;
-            top: 400px; 
+            top: 710px; 
             max-width: 83%;
-            left: 1500px;
+            left: 400px;
             width: 200px;
             height: 100px;
             border: none;
             cursor: pointer;
             font-size: 20px;
         }
+        .video-container {
+            display: flex;          /* 启用Flex布局 */
+            flex-direction: row;    /* 水平排列（默认值，可省略） */
+            gap: 20px;             /* 两个视频之间的间距 */
+            justify-content: center; /* 水平居中 */
+            align-items: flex-start; /* 顶部对齐 */
+            margin: 20px auto;     /* 上下边距20px，左右自动居中 */
+            max-width: 1400px;     /* 限制最大宽度 */
+        }
+        .video-box {
+            width: 700px;          /* 固定宽度 */
+            height: 500px;         /* 固定高度 */
+        }
+
+        .video-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;   /* 关键属性：完整显示视频（可能有黑边） */
+            display: block;
+            background: black;     /* 黑边填充色（可选） */
+        }
     </style>
 </head>
 <body>
     <h1>身份识别与预警</h1>
-    <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 2" style="position: absolute; width: 700px; top: 100px; left: 700px;">
+    <!-- <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 2" style="position: absolute; width: 700px; top: 100px; left: 700px;"> -->
 
+    <!-- 新增：视频容器（用于显示原视频和处理后的视频） -->
+    <div class="video-container">
+        <div class="video-box">
+            <h3>原始视频</h3>
+            <video id="original-video" controls></video>
+        </div>
+        <div class="video-box">
+            <h3>处理后视频</h3>
+            <video id="processed-video" controls></video>
+        </div>
+    </div>
+    
     <form id="nameForm">
         <label for="nameInput">ID:</label>
         <input type="text" id="nameInput" name="name" autocomplete="off", class="nameInput">
@@ -128,29 +161,41 @@
         document.getElementById('video-input').addEventListener('change', async function(e) {
             var videoInput = document.getElementById('video-input');
             var file = videoInput.files[0];
-            if (file) {
-                var formData = new FormData();
-                formData.append('file', file);  // Append the selected file to the FormData object
+            if (!file) return
 
-                // Send the file to the Python server
-                fetch('/upload_video', {
-                    method: 'POST',
-                    body: formData  // Send the file as part of the body
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Create a video element to display the processed video
-                    var videoElement = document.createElement('video');
-                    videoElement.controls = true;
-                    videoElement.src = data.video_url; // The server response will contain the URL to the processed video
-                    document.getElementById('video-container').appendChild(videoElement);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            } else {
-                alert("Please select a video file.");
-            }
+            // 显示原始视频
+            const originalVideo = document.getElementById('original-video');
+            originalVideo.src = URL.createObjectURL(file);
+
+            var formData = new FormData();
+            formData.append('file', file);  // Append the selected file to the FormData object
+
+            // Send the file to the Python server
+            fetch('/upload_video', {
+                method: 'POST',
+                body: formData  // Send the file as part of the body
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 显示处理后的视频
+                console.log("GGGGGGGGGGGGGGGood:", data);
+
+                const processedVideo = document.getElementById('processed-video');
+                processedVideo.src = data.out_video_url;
+
+                // processedVideo.onerror = () => {
+                //     console.error("视频加载失败");
+                //     alert("处理后的视频无法播放，请检查控制台");
+                // };
+
+                // processedVideo.onloadeddata = () => {
+                //     console.log("视频已加载");
+                // };
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         });
     </script>
 </body>

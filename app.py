@@ -4,11 +4,14 @@ import io
 from werkzeug.utils import secure_filename
 import os
 from bone import process_video
+from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
+CORS(app)  # 允许所有路由跨域
 
-UPLOAD_FOLDER = 'uploads'
-OUTPUT_FOLDER = 'processed_videos'
+UPLOAD_FOLDER = 'videos_upload'
+OUTPUT_FOLDER = 'videos_processed'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
@@ -50,15 +53,18 @@ def upload_video():
     file.save(video_path)
 
     # 处理视频 (这里可以进行视频处理，下面是一个简单的示例)
-    processed_video_path = os.path.join(OUTPUT_FOLDER, 'processed_' + video_filename)
-    process_video(video_path, processed_video_path)  # 调用你的处理视频的函数
+    time_str = datetime.now().strftime("%Y%m%d%H%M%S_")
+    processed_video_path = os.path.join(OUTPUT_FOLDER, 'processed_' + time_str + video_filename)
+    out_video_path = os.path.join(OUTPUT_FOLDER, 'out_' + time_str + video_filename)
+    process_video(video_path, processed_video_path) 
+    os.system(f'ffmpeg -i {processed_video_path} -c:v libx264 {out_video_path}')
 
     # 返回处理后的视频 URL
-    video_url = f"/processed_videos/{processed_video_path.split('/')[-1]}"
-    return jsonify({"video_url": video_url})
+    out_video_url = out_video_path
+    return jsonify({"out_video_url": out_video_url})
 
 # 提供处理后的视频文件
-@app.route('/processed_videos/<filename>')
+@app.route(f'/{OUTPUT_FOLDER}/<filename>')
 def serve_processed_video(filename):
     return send_from_directory(OUTPUT_FOLDER, filename)
 

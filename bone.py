@@ -19,14 +19,17 @@ def process_video(filepath, processed_video_path):
     # filepath = 'data/test.mp4'
     cap = cv2.VideoCapture(filepath)
 
+    # 获取视频的帧率、宽度和高度
+    fps = cap.get(cv2.CAP_PROP_FPS)
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 或者使用 'XVID' 或 'MJPG'
-    out = cv2.VideoWriter(processed_video_path, fourcc, 20.0, (frame_width, frame_height))  # 20.0是fps，可以根据需要修改
+    
+    # 创建VideoWriter对象，使用原始视频的fps和尺寸
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # 也可以使用 'XVID' 或 'MJPG'
+    out = cv2.VideoWriter(processed_video_path, fourcc, fps, (frame_width, frame_height))
 
     
     pTime = 0  # 设置第一帧开始处理的起始时间
-    
     #（2）处理每一帧图像
     lmlist = [] # 存放人体关键点信息
     
@@ -34,6 +37,8 @@ def process_video(filepath, processed_video_path):
         
         # 接收图片是否导入成功、帧图像
         success, img = cap.read()
+        if not success:  # 如果读取失败（视频结束）
+            break
         
         # 将导入的BGR格式图像转为RGB格式
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -61,7 +66,7 @@ def process_video(filepath, processed_video_path):
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 
                 # 打印坐标信息
-                print(index, cx, cy)
+                # print(index, cx, cy)
                 
                 # 保存坐标信息
                 lmlist.append((cx, cy))
@@ -77,9 +82,11 @@ def process_video(filepath, processed_video_path):
         # 在视频上显示fps信息，先转换成整数再变成字符串形式，文本显示坐标，文本字体，文本大小
         cv2.putText(img, str(int(fps)), (70,50), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,0), 3)  
         
-        # # 显示图像，输入窗口名及图像数据
+        # 显示图像，输入窗口名及图像数据
         # cv2.imshow('image', img) 
         # cv2.moveWindow("image", 0, 0) 
+        
+        # 写入帧到输出视频
         out.write(img)
 
         # if cv2.waitKey(10) & 0xFF==27:  #每帧滞留15毫秒后消失，ESC键退出
@@ -87,6 +94,7 @@ def process_video(filepath, processed_video_path):
     
     # 释放视频资源
     cap.release()
-    cv2.destroyAllWindows()
+    out.release()  # 确保释放VideoWriter资源
+    # cv2.destroyAllWindows()
 
-process_video("./data/lv_0_20231019162724", "./")
+# process_video("./data/lv_0_20231019162048.mp4", "./output.mp4")
