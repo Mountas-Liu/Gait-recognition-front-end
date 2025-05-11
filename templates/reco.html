@@ -87,7 +87,7 @@
 <body>
     <h1>身份识别与预警</h1>
     <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 2" style="position: absolute; width: 700px; top: 100px; left: 700px;">
-    
+
     <form id="nameForm">
         <label for="nameInput">ID:</label>
         <input type="text" id="nameInput" name="name" autocomplete="off", class="nameInput">
@@ -120,7 +120,38 @@
             }
         });
     </script>
-    <button type="button" id="upload-button" class="buttonTime">实时监控</button>
+    <!-- <button type="button" id="upload-button" class="buttonTime">实时监控</button> -->
+
     <input type="file" id="video-input" accept="video/*" class="buttonUp" required>
+    <script>
+        // Function to handle video upload and display
+        document.getElementById('video-input').addEventListener('change', async function(e) {
+            var videoInput = document.getElementById('video-input');
+            var file = videoInput.files[0];
+            if (file) {
+                var formData = new FormData();
+                formData.append('file', file);  // Append the selected file to the FormData object
+
+                // Send the file to the Python server
+                fetch('/upload_video', {
+                    method: 'POST',
+                    body: formData  // Send the file as part of the body
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Create a video element to display the processed video
+                    var videoElement = document.createElement('video');
+                    videoElement.controls = true;
+                    videoElement.src = data.video_url; // The server response will contain the URL to the processed video
+                    document.getElementById('video-container').appendChild(videoElement);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert("Please select a video file.");
+            }
+        });
+    </script>
 </body>
 {% endblock %}

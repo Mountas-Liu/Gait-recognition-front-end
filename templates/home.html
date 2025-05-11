@@ -42,6 +42,11 @@
         <textarea id="text-input" placeholder="ID..." required></textarea>
         <br>
         <button type="button" id="upload-button">登陆！</button>
+        <script>
+            document.getElementById("upload-button").addEventListener("click", function() {
+                window.location.href = "reco";
+            });
+        </script>
     </div>
 </body>
 {% endblock %}

@@ -1,8 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from PIL import Image
 import io
+from werkzeug.utils import secure_filename
+import os
+from bone import process_video
 
 app = Flask(__name__)
+
+UPLOAD_FOLDER = 'uploads'
+OUTPUT_FOLDER = 'processed_videos'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
 
 @app.route('/')
 def home():
@@ -24,57 +33,38 @@ def extract():
 def stat():
     return render_template('stat.html')
 
-@app.route('/enter-img')
-def enter_img():
-    if 'image' not in request.files:
-        return jsonify({'message': 'No image uploaded.'}), 400
+# 上传视频的路由
+@app.route('/upload_video', methods=['POST'])
+def upload_video():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-    file = request.files['image']
+    # 保存上传的视频文件
+    video_filename = secure_filename(file.filename)
+    video_path = os.path.join(UPLOAD_FOLDER, video_filename)
+    file.save(video_path)
 
-    # 打开图片
-    image = Image.open(file.stream)
+    # 处理视频 (这里可以进行视频处理，下面是一个简单的示例)
+    processed_video_path = os.path.join(OUTPUT_FOLDER, 'processed_' + video_filename)
+    process_video(video_path, processed_video_path)  # 调用你的处理视频的函数
 
-    # 处理图片（示例：将图片转为灰度图）
-    processed_image = image.convert('L')
+    # 返回处理后的视频 URL
+    video_url = f"/processed_videos/{processed_video_path.split('/')[-1]}"
+    return jsonify({"video_url": video_url})
 
-    # 将处理后的图片保存到字节流
-    byte_io = io.BytesIO()
-    processed_image.save(byte_io, format='PNG')
-    byte_io.seek(0)
-
-    # 返回处理后的图片
-    return jsonify({
-        'message': 'Image processed successfully.',
-        'image': byte_io.read().hex()  # 将图片数据转为十六进制字符串
-    })
+# 提供处理后的视频文件
+@app.route('/processed_videos/<filename>')
+def serve_processed_video(filename):
+    return send_from_directory(OUTPUT_FOLDER, filename)
 
 
-@app.route('/reco-img')
-def reco_img():
-    if 'image' not in request.files:
-        return jsonify({'message': 'No image uploaded.'}), 400
-
-    file = request.files['image']
-
-    # 打开图片
-    image = Image.open(file.stream)
-
-    # 处理图片（示例：将图片转为灰度图）
-    processed_image = image.convert('L')
-
-    # 将处理后的图片保存到字节流
-    byte_io = io.BytesIO()
-    processed_image.save(byte_io, format='PNG')
-    byte_io.seek(0)
-
-    # 返回处理后的图片
-    return jsonify({
-        'message': 'Image processed successfully.',
-        'image': byte_io.read().hex()  # 将图片数据转为十六进制字符串
-    })
-
+# 检测
 existing_names = ['张三', '李四']
-
 @app.route('/check_name', methods=['POST'])
 def check_name():
     data = request.get_json()
